@@ -1,0 +1,18 @@
+[project]
+name = "nlp-political-bias-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.128.8",
+    "matplotlib>=3.9.4",
+    "pandas>=2.3.3",
+    "pytest>=8.4.2",
+    "uvicorn>=0.39.0",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.31.0",
+]
