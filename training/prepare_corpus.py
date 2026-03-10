@@ -3,11 +3,18 @@
 import argparse
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
+import sys
 
 import pandas as pd
 
-RAW_CORPUS_PATH = Path("data/raw/reddit_corpus_unbalanced_filtered.pkl")
-PROCESSED_DIR = Path("data/processed")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_DIR = PROJECT_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+from political_bias_api.core.paths import CORPUS_PKL, POSTS_CSV, USERS_CSV, ensure_data_dirs
+
+RAW_CORPUS_PATH = CORPUS_PKL
 
 
 def _safe_text(value: Any) -> str:
@@ -124,6 +131,7 @@ def prepare_dataset(input_path: Path, output_path: Path, level: str) -> None:
     5. Save CSV and print summary stats.
     """
     input_path = _resolve_input_path(input_path)
+    ensure_data_dirs()
     print(f"Loading corpus from: {input_path}")
     dataframe = pd.read_pickle(input_path)
     _validate_columns(dataframe)
@@ -169,12 +177,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.output is None:
-        filename = (
-            "reddit_users_text_label.csv"
-            if args.level == "user"
-            else "reddit_posts_text_label.csv"
-        )
-        output_path = PROCESSED_DIR / filename
+        output_path = USERS_CSV if args.level == "user" else POSTS_CSV
     else:
         output_path = args.output
 

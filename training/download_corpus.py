@@ -9,15 +9,20 @@ import argparse
 import gzip
 import shutil
 from pathlib import Path
+import sys
 
 import gdown
 
-RAW_DIR = Path("data/raw")
-RAW_DIR.mkdir(parents=True, exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_DIR = PROJECT_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+from political_bias_api.core.paths import CORPUS_PKL, RAW_DIR, ensure_data_dirs
 
 DEFAULT_URL = "https://drive.google.com/uc?id=1pevK3uZVLadH8a5KzT7d1Mlkkjby23Og"
 ARCHIVE_PATH = RAW_DIR / "reddit_corpus_unbalanced_filtered.gzip"
-EXTRACTED_PATH = RAW_DIR / "reddit_corpus_unbalanced_filtered.pkl"
+EXTRACTED_PATH = CORPUS_PKL
 
 
 def download_archive(url: str, output: Path) -> Path:
@@ -54,6 +59,8 @@ def download_and_extract(url: str, keep_archive: bool, force: bool) -> None:
     If the extracted corpus already exists and ``force`` is not enabled,
     the function exits without downloading.
     """
+    ensure_data_dirs()
+
     if EXTRACTED_PATH.exists() and not force:
         print(f"Extracted corpus already exists: {EXTRACTED_PATH}")
         print("Use --force to download and extract again.")
