@@ -1,8 +1,11 @@
 # NLP Political Bias API
 
-This project prepares and explores the FACTOID political corpus for downstream training and API usage.
+This project prepares and explores the FACTOID political corpus for downstream model training and API usage.
 
-## Quick start
+## Environment
+
+- Python baseline: `3.11` (project minimum is `>=3.11`)
+- Dependency manager: `uv`
 
 Install dependencies:
 
@@ -10,7 +13,7 @@ Install dependencies:
 uv sync
 ```
 
-Optional: activate the virtual environment:
+Optional: activate the environment:
 
 ```bash
 source .venv/bin/activate
@@ -18,12 +21,12 @@ source .venv/bin/activate
 
 ## Corpus workflow
 
-The data pipeline lives in:
+Pipeline scripts:
 
 - `training/download_corpus.py`
 - `training/prepare_corpus.py`
 
-### 1) Download and extract the corpus
+### 1) Download and extract corpus
 
 ```bash
 uv run training/download_corpus.py
@@ -31,17 +34,14 @@ uv run training/download_corpus.py
 
 What it does:
 
-- Downloads the corpus from Google Drive.
-- Extracts it to pickle format.
+- Downloads the corpus archive from Google Drive.
+- Extracts the archive into pickle format.
 - Removes the `.gzip` archive by default after extraction.
 
 Useful options:
 
 ```bash
-# Re-download and re-extract even if the corpus already exists
 uv run training/download_corpus.py --force
-
-# Keep the .gzip archive after extraction
 uv run training/download_corpus.py --keep-archive
 ```
 
@@ -49,9 +49,9 @@ Main output:
 
 - `data/raw/reddit_corpus_unbalanced_filtered.pkl`
 
-### 2) Generate processed dataset(s)
+### 2) Build processed datasets
 
-User-level dataset (recommended starting point):
+User-level dataset:
 
 ```bash
 uv run training/prepare_corpus.py --level user
@@ -66,29 +66,43 @@ uv run training/prepare_corpus.py --level post
 Outputs:
 
 - `data/processed/reddit_users_text_label.csv`
-- `data/processed/reddit_posts_text_label.csv` (only generated when using `--level post`)
+- `data/processed/reddit_posts_text_label.csv` (only when using `--level post`)
 
-## Shared path module
+## Shared paths
 
-Filesystem paths are centralized in:
+All common filesystem paths are defined in:
 
 - `src/political_bias_api/core/paths.py`
 
-This keeps paths consistent across:
+This module is used by scripts and notebooks to avoid path drift.
 
-- training scripts
-- notebooks
-- app/API code
+## Notebooks
 
-## Dataset exploration notebook
-
-Primary notebook:
+### Notebook 1
 
 - `notebooks/01_dataset_exploration.ipynb`
+- Full exploratory analysis of user-level processed data (schema, quality checks, label distribution, activity, text length, raw vs processed coverage).
 
-The notebook imports shared paths so it works consistently regardless of working directory.
+### Notebook 2
 
-## Version-control note
+- `notebooks/02_semantic_exploration.ipynb`
+- Currently implemented sections:
+	1. Environment setup and dependencies
+	2. User-level loading and schema validation
+	3. Analysis dataset assembly using processed data as-is (no duplicated preprocessing)
+- Next planned sections:
+	4. Programmatic semantic exploration (CountVectorizer + UMAP/embeddings)
+	5. Artifact persistence
 
-Large artifacts (`data/raw`, `data/processed`, `models`) are ignored by Git.  
-The repository versions pipeline code, not generated datasets.
+## Testing
+
+Run tests with:
+
+```bash
+uv run pytest -q
+```
+
+## Version control note
+
+Large generated artifacts (`data/raw`, `data/processed`, `models`) are ignored by Git.
+The repository tracks code and reproducible workflows, not generated datasets.
