@@ -96,10 +96,22 @@ This module is used by scripts and notebooks to avoid path drift.
 
 ## Testing
 
-Run tests with:
+Current unit tests:
+
+- `tests/test_prepare_corpus.py`
+- `tests/test_download_corpus.py`
+
+Run all tests:
 
 ```bash
 uv run pytest -q
+```
+
+Run per script:
+
+```bash
+uv run pytest -q tests/test_prepare_corpus.py
+uv run pytest -q tests/test_download_corpus.py
 ```
 
 ## Version control note
