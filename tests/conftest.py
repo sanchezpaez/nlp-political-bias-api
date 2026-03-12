@@ -29,3 +29,9 @@ def _load_module(relative_path: str, module_name: str) -> ModuleType:
 def prepare_module():
     """Provide the loaded training/prepare_corpus.py module for tests."""
     return _load_module("training/prepare_corpus.py", "prepare_corpus_module")
+
+
+@pytest.fixture(scope="session")
+def download_module():
+	"""Provide the loaded training/download_corpus.py module for tests."""
+	return _load_module("training/download_corpus.py", "download_corpus_module")
