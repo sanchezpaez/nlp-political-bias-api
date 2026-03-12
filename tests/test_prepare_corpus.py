@@ -72,3 +72,35 @@ def test_build_post_level_dataset(prepare_module):
 	assert list(output.columns) == ["user_id", "doc_id", "created_at", "subreddit", "label", "text"]
 	assert len(output) == 2
 	assert set(output["doc_id"].tolist()) == {"d1", "d2"}
+
+
+def test_prepare_dataset_writes_user_csv(tmp_path, prepare_module, monkeypatch):
+	"""`prepare_dataset` should write a user-level CSV with expected schema and values."""
+	dataframe = pd.DataFrame(
+		{
+			"user_id": ["u1"],
+			"fake_news_spreader": [1],
+			"documents": [[("d1", "hello world", "2020", "nlp")]],
+		}
+	)
+
+	input_path = tmp_path / "corpus.pkl"
+	output_path = tmp_path / "users.csv"
+	dataframe.to_pickle(input_path)
+
+	monkeypatch.setattr(prepare_module, "ensure_data_dirs", lambda: None)
+	prepare_module.prepare_dataset(input_path=input_path, output_path=output_path, level="user")
+
+	saved = pd.read_csv(output_path)
+	assert list(saved.columns) == ["user_id", "label", "n_posts", "text"]
+	assert len(saved) == 1
+	assert saved.iloc[0]["n_posts"] == 1
+	assert saved.iloc[0]["text"] == "hello world"
+
+
+def test_prepare_dataset_missing_input_raises(tmp_path, prepare_module):
+	"""`prepare_dataset` should raise when the input pickle file does not exist."""
+	missing_input = tmp_path / "missing.pkl"
+	output_path = tmp_path / "users.csv"
+	with pytest.raises(FileNotFoundError):
+		prepare_module.prepare_dataset(input_path=missing_input, output_path=output_path, level="user")
